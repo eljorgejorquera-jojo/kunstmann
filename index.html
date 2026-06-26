@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kunstmann · Hecha con Lluvia</title>
+<style>
+  :root{
+    --noche:        #0d2630;
+    --noche-2:      #0a1c24;
+    --rio:          #2e6b9e;
+    --dorado:       #ffc222;
+    --dorado-2:     #e8a813;
+    --cielo:        #cfeef2;
+    --niebla:       #8fb6c2;
+    --vidrio:       rgba(255,255,255,0.06);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html,body{
+    height:100%;
+    font-family:'Georgia', 'Times New Roman', serif;
+    background: radial-gradient(ellipse at 50% -10%, #1c4654 0%, var(--noche) 55%, var(--noche-2) 100%);
+    color: var(--cielo);
+    overflow-x:hidden;
+  }
+
+  .stage{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding: 32px 20px 48px;
+  }
+
+  /* ---------- RAIN ---------- */
+  .rain{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:1;
+    overflow:hidden;
+  }
+  .drop{
+    position:absolute;
+    top:-10%;
+    width:2px;
+    background: linear-gradient(to bottom, rgba(207,238,242,0) 0%, rgba(207,238,242,0.55) 60%, rgba(207,238,242,0.85) 100%);
+    border-radius: 2px;
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes fall{
+    0%{ transform: translateY(-10vh); opacity:0; }
+    8%{ opacity:1; }
+    100%{ transform: translateY(110vh); opacity:0.4; }
+  }
+
+  .splash{
+    position:absolute;
+    bottom:0;
+    width:10px;
+    height:3px;
+    border-radius:50%;
+    border:1px solid rgba(207,238,242,0.35);
+    opacity:0;
+    animation-name: splash;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes splash{
+    0%{ opacity:0; transform: scale(0.3); }
+    5%{ opacity:0.8; transform: scale(0.6);}
+    20%{ opacity:0; transform: scale(1.6); }
+    100%{ opacity:0; }
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width: 420px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .eyebrow{
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--dorado);
+    text-transform:uppercase;
+    margin-bottom:6px;
+    opacity:0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.1s;
+  }
+
+  .wordmark{
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-weight:900;
+    font-size: 44px;
+    letter-spacing: 1px;
+    color: var(--dorado);
+    text-shadow: 3px 4px 0 #000;
+    transform: rotate(-1.2deg);
+    margin-bottom: 2px;
+    opacity:0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.2s;
+  }
+
+  .tagline{
+    font-style:italic;
+    font-size: 14px;
+    color: var(--niebla);
+    margin-bottom: 28px;
+    opacity:0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.3s;
+  }
+
+  /* ---------- WEATHER CARD ---------- */
+  .card{
+    width:100%;
+    background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 28px 24px 24px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    opacity:0;
+    animation: fadeUp 0.8s ease forwards;
+    animation-delay: 0.4s;
+  }
+
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom: 18px;
+  }
+
+  .place{
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    color: var(--cielo);
+  }
+  .place strong{ color:#fff; }
+
+  .live-pill{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing:1.5px;
+    color: var(--dorado);
+    background: rgba(255,194,34,0.12);
+    border:1px solid rgba(255,194,34,0.35);
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+  .live-dot{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--dorado);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:0.4; transform:scale(0.7); }
+  }
+
+  .rain-amount{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap: 8px;
+    margin: 10px 0 4px;
+  }
+  .rain-amount .num{
+    font-size: 76px;
+    font-weight: 700;
+    color: #fff;
+    line-height:1;
+    font-family: Georgia, serif;
+  }
+  .rain-amount .unit{
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    color: var(--niebla);
+    padding-bottom: 10px;
+  }
+  .rain-label{
+    text-align:center;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--niebla);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+
+  .stats-row{
+    display:flex;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 16px;
+    margin-bottom: 4px;
+  }
+  .stat{
+    text-align:center;
+    flex:1;
+  }
+  .stat .stat-val{
+    font-size: 22px;
+    color:#fff;
+    font-family: Georgia, serif;
+  }
+  .stat .stat-key{
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--niebla);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .stat-divider{
+    width:1px;
+    background: rgba(255,255,255,0.1);
+    margin: 2px 0;
+  }
+
+  /* ---------- MESSAGE ---------- */
+  .message-box{
+    width:100%;
+    text-align:center;
+    margin-top: 26px;
+    opacity:0;
+    animation: fadeUp 0.8s ease forwards;
+    animation-delay: 0.6s;
+  }
+  .message-main{
+    font-family: Georgia, serif;
+    font-size: 19px;
+    line-height:1.45;
+    color: #fff;
+  }
+  .message-main .accent{
+    color: var(--dorado);
+    font-style:italic;
+  }
+
+  .message-sub{
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--niebla);
+    margin-top: 10px;
+  }
+
+  /* ---------- BOTTLE ICON ---------- */
+  .bottle-icon{
+    margin-top: 30px;
+    opacity:0;
+    animation: fadeUp 0.9s ease forwards;
+    animation-delay: 0.75s;
+  }
+
+  footer{
+    position:relative;
+    z-index:2;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(207,238,242,0.45);
+    text-transform: uppercase;
+    margin-top: 36px;
+    text-align:center;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .loading{
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: var(--niebla);
+    text-align:center;
+    padding: 30px 0;
+  }
+
+  .error-msg{
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #e8a813;
+    text-align:center;
+    padding: 14px 0 0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .drop, .splash, .live-dot{ animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="rain" id="rain"></div>
+
+  <div class="stage">
+    <div class="content">
+
+      <div class="eyebrow">Cervecería Kunstmann</div>
+      <div class="wordmark">kunstmann</div>
+      <div class="tagline">— Hecha con Lluvia —</div>
+
+      <div class="card">
+        <div class="card-top">
+          <div class="place"><strong>Valdivia</strong>, Chile</div>
+          <div class="live-pill"><span class="live-dot"></span>EN VIVO</div>
+        </div>
+
+        <div id="weatherBody">
+          <div class="loading">Consultando el cielo de Valdivia…</div>
+        </div>
+      </div>
+
+      <div class="message-box" id="messageBox" style="display:none;">
+        <div class="message-main" id="messageMain"></div>
+        <div class="message-sub">Cada gota que cae alimenta el río Torobayo — el agua de tu cerveza.</div>
+      </div>
+
+      <div class="bottle-icon">
+        <svg width="60" height="120" viewBox="0 0 60 120" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 6 L22 18 L14 30 L14 100 Q14 110 24 110 L36 110 Q46 110 46 100 L46 30 L38 18 L38 6 Z"
+                fill="none" stroke="#ffc222" stroke-width="2" opacity="0.8"/>
+          <rect x="20" y="2" width="20" height="8" fill="none" stroke="#ffc222" stroke-width="2" opacity="0.8"/>
+          <line x1="14" y1="55" x2="46" y2="55" stroke="#ffc222" stroke-width="1" opacity="0.4"/>
+        </svg>
+      </div>
+
+    </div>
+
+    <footer>Cervecería Kunstmann · Valdivia · Desde 1991</footer>
+  </div>
+
+<script>
+  // ---------- RAIN ANIMATION ----------
+  (function buildRain(){
+    const container = document.getElementById('rain');
+    const dropCount = window.innerWidth < 480 ? 38 : 70;
+    for(let i=0;i<dropCount;i++){
+      const drop = document.createElement('div');
+      drop.className = 'drop';
+      const left = Math.random()*100;
+      const duration = 0.6 + Math.random()*0.9;
+      const delay = Math.random()*3;
+      const height = 14 + Math.random()*26;
+      const opacity = 0.3 + Math.random()*0.5;
+      drop.style.left = left+'vw';
+      drop.style.height = height+'px';
+      drop.style.animationDuration = duration+'s';
+      drop.style.animationDelay = delay+'s';
+      drop.style.opacity = opacity;
+      container.appendChild(drop);
+
+      const splash = document.createElement('div');
+      splash.className = 'splash';
+      splash.style.left = left+'vw';
+      splash.style.animationDuration = duration+'s';
+      splash.style.animationDelay = delay+'s';
+      container.appendChild(splash);
+    }
+  })();
+
+  // ---------- WEATHER FETCH (Open-Meteo, Valdivia) ----------
+  const LAT = -39.8142;
+  const LON = -73.2459;
+  const API = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,precipitation,weather_code&daily=precipitation_sum&timezone=America%2FSantiago`;
+
+  function weatherCodeToText(code){
+    if(code === 0) return 'Cielo despejado';
+    if([1,2,3].includes(code)) return 'Parcialmente nublado';
+    if([45,48].includes(code)) return 'Niebla';
+    if([51,53,55,56,57].includes(code)) return 'Llovizna';
+    if([61,63,65,66,67].includes(code)) return 'Lluvia';
+    if([71,73,75,77].includes(code)) return 'Nieve';
+    if([80,81,82].includes(code)) return 'Chubascos';
+    if([95,96,99].includes(code)) return 'Tormenta';
+    return 'Variable';
+  }
+
+  function render(data){
+    const cur = data.current;
+    const dailySum = data.daily && data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : cur.precipitation;
+    const mm = (dailySum !== undefined && dailySum !== null) ? dailySum : cur.precipitation;
+    const mmRounded = Math.round(mm*10)/10;
+    const temp = Math.round(cur.temperature_2m*10)/10;
+    const condition = weatherCodeToText(cur.weather_code);
+
+    const body = document.getElementById('weatherBody');
+    body.innerHTML = `
+      <div class="rain-amount">
+        <span class="num">${mmRounded}</span>
+        <span class="unit">mm</span>
+      </div>
+      <div class="rain-label">de lluvia hoy en Valdivia</div>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-val">${temp}°C</div>
+          <div class="stat-key">Temperatura</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-val">${condition}</div>
+          <div class="stat-key">Condición</div>
+        </div>
+      </div>
+    `;
+
+    const msgBox = document.getElementById('messageBox');
+    const msgMain = document.getElementById('messageMain');
+    if(mmRounded > 0){
+      msgMain.innerHTML = `Hoy llueve <span class="accent">${mmRounded} mm</span> en Valdivia.<br>Tu Kunstmann está en su elemento.`;
+    } else {
+      msgMain.innerHTML = `Hoy no llueve en Valdivia,<br>pero tu Kunstmann <span class="accent">nació de la lluvia</span> de siempre.`;
+    }
+    msgBox.style.display = 'block';
+  }
+
+  fetch(API)
+    .then(res => {
+      if(!res.ok) throw new Error('Respuesta no válida');
+      return res.json();
+    })
+    .then(render)
+    .catch(err => {
+      const body = document.getElementById('weatherBody');
+      body.innerHTML = `<div class="error-msg">No pudimos consultar el clima ahora. Igual sabemos una cosa: en Valdivia, la lluvia nunca está muy lejos.</div>`;
+      const msgBox = document.getElementById('messageBox');
+      const msgMain = document.getElementById('messageMain');
+      msgMain.innerHTML = `Llueva o no, tu Kunstmann <span class="accent">nació de la lluvia</span> de Valdivia.`;
+      msgBox.style.display = 'block';
+    });
+</script>
+
+</body>
+</html>
